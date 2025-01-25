@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max's Snack Dash</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+            display: none;
+        }
+
+        #overlay button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            background-color: #ff6f61;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #overlay button:hover {
+            background-color: #ff4c3b;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">0</div>
+    <div id="overlay">
+        <div id="message">איזה באסה! לילי גנבה לך את החטיף. רוצה לנסות לשחק מחדש?</div>
+        <button id="replay">Replay</button>
+    </div>
+    <canvas></canvas>
+
+    <script>
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("overlay");
+        const replayButton = document.getElementById("replay");
+        const scoreElement = document.getElementById("score");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const background = new Image();
+        background.src = "background.jpeg";
+
+        const maxImg = new Image();
+        maxImg.src = "max.png";
+
+        const lillyImg = new Image();
+        lillyImg.src = "lilly.png";
+
+        const snackImg = new Image();
+        snackImg.src = "snack.png";
+
+        const music = new Audio("music.mp3");
+        music.loop = true;
+        music.play();
+
+        const max = { x: canvas.width / 2, y: canvas.height - 100, width: 80, height: 80, speed: 10 };
+        const lilly = { x: Math.random() * canvas.width, y: -100, width: 80, height: 80, speed: 5 };
+        const snack = { x: Math.random() * canvas.width, y: -100, width: 50, height: 50, speed: 3 };
+
+        let score = 0;
+        let gameOver = false;
+
+        function draw() {
+            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(maxImg, max.x, max.y, max.width, max.height);
+            ctx.drawImage(lillyImg, lilly.x, lilly.y, lilly.width, lilly.height);
+            ctx.drawImage(snackImg, snack.x, snack.y, snack.width, snack.height);
+        }
+
+        function update() {
+            lilly.y += lilly.speed;
+            snack.y += snack.speed;
+
+            if (lilly.y > canvas.height) {
+                lilly.y = -100;
+                lilly.x = Math.random() * canvas.width;
+            }
+
+            if (snack.y > canvas.height) {
+                snack.y = -100;
+                snack.x = Math.random() * canvas.width;
+            }
+
+            if (
+                max.x < snack.x + snack.width &&
+                max.x + max.width > snack.x &&
+                max.y < snack.y + snack.height &&
+                max.y + max.height > snack.y
+            ) {
+                score++;
+                snack.y = -100;
+                snack.x = Math.random() * canvas.width;
+                scoreElement.textContent = score;
+            }
+
+            if (
+                max.x < lilly.x + lilly.width &&
+                max.x + max.width > lilly.x &&
+                max.y < lilly.y + lilly.height &&
+                max.y + max.height > lilly.y
+            ) {
+                gameOver = true;
+                music.pause();
+                overlay.style.display = "flex";
+            }
+        }
+
+        function loop() {
+            if (!gameOver) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                draw();
+                update();
+                requestAnimationFrame(loop);
+            }
+        }
+
+        window.addEventListener("touchmove", (e) => {
+            max.x = e.touches[0].clientX - max.width / 2;
+            max.y = e.touches[0].clientY - max.height / 2;
+        });
+
+        replayButton.addEventListener("click", () => {
+            score = 0;
+            scoreElement.textContent = score;
+            lilly.y = -100;
+            snack.y = -100;
+            gameOver = false;
+            overlay.style.display = "none";
+            music.play();
+            loop();
+        });
+
+        loop();
+    </script>
+</body>
+</html>
