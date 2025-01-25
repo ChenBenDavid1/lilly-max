@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -89,7 +89,10 @@
 
         const music = new Audio("music.mp3");
         music.loop = true;
-        music.play();
+        music.play();  // התחלת המוזיקה מיד כשהדף נטען
+
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
 
         const max = { x: canvas.width / 2, y: canvas.height - 100, width: 160, height: 160, speed: 10 };  // הגדלתי פי 2    
         const lilly = { x: Math.random() * canvas.width, y: -100, width: 160, height: 160, speed: 5 };  // הגדלתי פי 2
